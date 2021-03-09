@@ -22,51 +22,12 @@ public class PlayerController {
 
     @PostMapping("/swipe_out")
     public PlayerDetails swipeOutUser(@RequestParam String userName) {
-        PlayerDetails playerDetails = PlayerDetailsService.getPlayerHistory().get(userName);
-        if (Constant.GameStatus.SWIPED_IN.equals(playerDetails.getGameStatus())) {
-            playerDetails.setGameStatus(Constant.GameStatus.SWIPED_OUT);
-            PlayerDetailsService.setPlayerHistory(playerDetails);
-            return playerDetails;
-        }
-        return null;
+        return playerDetailsService.swipeOutUser(userName);
     }
 
     @PostMapping("/swipe_in")
     public PlayerDetails swipeInUser(@RequestParam String userName, @RequestParam int level) {
-        PlayerDetails playerDetails = PlayerDetailsService.getPlayerHistory().get(userName);
-        if (playerDetails == null) {
-            if (level == 1
-                    || level == Game.getInstance().getLevels()) {
-                boolean incremental = true;
-                if (level == Game.getInstance().getLevels())
-                    incremental = false;
-                playerDetails = new PlayerDetails(level, userName, new Date(), Constant.GameStatus.SWIPED_IN, incremental);
-                return playerDetails;
-            } else {
-                throw new InvalidLevelException("Starting levels can be G1 or G" + Game.getInstance().getLevels());
-            }
-        }
-
-        boolean incremental = playerDetails.isIncrementalGame();
-        int currentLevel = playerDetails.getGameLevel();
-        String gameStatus = playerDetails.getGameStatus().name();
-        long cardAmount = UserService.users.get(userName).getCard().getAmount();
-        int todayDay = new Date().getDay();
-
-        if (!((incremental && currentLevel + 1 == level) || (!incremental && currentLevel - 1 == level)) && gameStatus.equals("SWIPED_OUT")) {
-            throw new InvalidLevelException("");
-        }
-        Game game = Game.getInstance();
-        int todayCost = game.getWeekDayCost();
-        if (todayDay == 0 || todayDay == 6) {
-            todayCost = game.getWeekendCost();
-        }
-        if (cardAmount < todayCost || cardAmount - todayCost < 10) {
-            throw new InsufficientBalanceException();
-        }
-        UserService.users.get(userName).getCard().setAmount(cardAmount - todayCost);
-        playerDetails = new PlayerDetails(level, userName, new Date(), Constant.GameStatus.SWIPED_IN, incremental);
-        return playerDetails;
+        return playerDetailsService.swipeInUser(userName, level);
     }
 
 }
