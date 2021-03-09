@@ -9,4 +9,9 @@ public class Constant {
     public static final int expiryYearLength = 2;
     public static final int LIMIT_USER_WRITE = 5;
 
+
+   public enum GameStatus{
+        SWIPED_IN,SWIPED_OUT
+    }
+
 }
