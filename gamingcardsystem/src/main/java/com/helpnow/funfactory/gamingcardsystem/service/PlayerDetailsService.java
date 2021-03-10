@@ -13,7 +13,9 @@ import java.util.Map;
 
 public class PlayerDetailsService {
 
-    static Map<String, PlayerDetails> playerHistory = new HashMap<>();
+
+
+    public static Map<String, PlayerDetails> playerHistory = new HashMap<>();
 
     public static Map<String, PlayerDetails> getPlayerHistory() {
         return playerHistory;
@@ -25,13 +27,13 @@ public class PlayerDetailsService {
 
     public PlayerDetails swipeInUser(String userName, int level) {
         PlayerDetails playerDetails = PlayerDetailsService.getPlayerHistory().get(userName);
-        if (playerDetails == null) {
-            if (level == 1
-                    || level == Game.getInstance().getLevels()) {
+        if (!PlayerDetailsService.getPlayerHistory().containsKey(userName)) {
+            if (level == 1 || level == Game.getInstance().getLevels()) {
                 boolean incremental = true;
                 if (level == Game.getInstance().getLevels())
                     incremental = false;
                 playerDetails = new PlayerDetails(level, userName, new Date(), Constant.GameStatus.SWIPED_IN, incremental);
+                PlayerDetailsService.setPlayerHistory(playerDetails);
                 return playerDetails;
             } else {
                 throw new InvalidLevelException("Starting levels can be G1 or G" + Game.getInstance().getLevels());
@@ -41,20 +43,26 @@ public class PlayerDetailsService {
         boolean incremental = playerDetails.isIncrementalGame();
         int currentLevel = playerDetails.getGameLevel();
         String gameStatus = playerDetails.getGameStatus().name();
-        if (!((incremental && currentLevel + 1 == level) || (!incremental && currentLevel - 1 == level)) && gameStatus.equals("SWIPED_OUT")) {
+        if (((incremental && currentLevel + 1 != level) ||
+                (!incremental && currentLevel - 1 != level)) || !gameStatus.equals("SWIPED_OUT")) {
             throw new InvalidLevelException("");
         }
         playerDetails = new PlayerDetails(level, userName, new Date(), Constant.GameStatus.SWIPED_IN, incremental);
+        PlayerDetailsService.setPlayerHistory(playerDetails);
         return playerDetails;
     }
 
     public PlayerDetails swipeOutUser(String userName) {
         PlayerDetails playerDetails = PlayerDetailsService.getPlayerHistory().get(userName);
-        if (Constant.GameStatus.SWIPED_IN.equals(playerDetails.getGameStatus())) {
+        if(playerDetails==null){
+            System.out.println("empty list");
+        }
+        else if (PlayerDetailsService.getPlayerHistory().containsKey(userName) &&
+                Constant.GameStatus.SWIPED_IN.equals(playerDetails.getGameStatus())) {
             long cardAmount = UserService.users.get(userName).getCard().getAmount();
             Game game = Game.getInstance();
             int todayDay = new Date().getDay();
-            int todayCost = todayDay == 0 || todayDay == 6 ? game.getWeekendCost() : game.getWeekDayCost();
+            int todayCost = ( todayDay == 0 || todayDay == 6 )? game.getWeekendCost() : game.getWeekDayCost();
             if (cardAmount < todayCost || cardAmount - todayCost < 10) {
                 throw new InsufficientBalanceException();
             }

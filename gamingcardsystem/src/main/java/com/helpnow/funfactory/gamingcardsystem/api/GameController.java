@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
     @PostMapping("/addGame")
-    public Game addGame(@RequestParam int levels, @RequestParam int weekday,
+    public Game addGame(@RequestParam int levels, @RequestParam int weekdayCost,
                           @RequestParam int weekendCost,
                           @RequestParam boolean hardRefresh) {
-        return Game.getInstance(levels, weekday, weekendCost, hardRefresh);
+        return Game.getInstance(levels, weekdayCost, weekendCost, hardRefresh);
     }
 
 }
