@@ -16,10 +16,5 @@ public class CardController {
         return "Updated Card Balance for "+ userName+" is "+ UserService.users.get(userName).getCard().getAmount();
     }
 
-    @PostMapping("/gameFees")
-    public String gameFees(@RequestParam String userName, @RequestParam long amount){
-        CardService.gameFee(userName,amount);
-        return "Updated Card Balance for "+ userName+" is "+ UserService.users.get(userName).getCard().getAmount();
-    }
 
 }
